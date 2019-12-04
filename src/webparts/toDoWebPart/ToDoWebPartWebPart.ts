@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
+import { sp } from "@pnp/sp";
 import {
   BaseClientSideWebPart,
   IPropertyPaneConfiguration,
@@ -17,10 +18,20 @@ export interface IToDoWebPartWebPartProps {
 
 export default class ToDoWebPartWebPart extends BaseClientSideWebPart<IToDoWebPartWebPartProps> {
 
+  public onInit(): Promise<void> {
+
+    return super.onInit().then(_ => {
+      sp.setup({
+        spfxContext: this.context
+      });
+    });
+  }
+
   public render(): void {
     const element: React.ReactElement<IToDoWebPartProps > = React.createElement(
       ToDoWebPart,
       {
+        ctx : this.context,
         description: this.properties.description
       }
     );

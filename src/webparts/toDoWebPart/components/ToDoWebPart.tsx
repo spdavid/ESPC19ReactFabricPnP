@@ -2,24 +2,47 @@ import * as React from 'react';
 import styles from './ToDoWebPart.module.scss';
 import { IToDoWebPartProps } from './IToDoWebPartProps';
 import { escape } from '@microsoft/sp-lodash-subset';
+import { spToDoService, IToDo } from '../../services/spToDoService';
+import ToDoList from './ToDoList';
+import ToDoPanel from './ToDoPanel';
 
-export default class ToDoWebPart extends React.Component<IToDoWebPartProps, {}> {
+export interface IToDoWebPartState
+{
+    toDos : IToDo[];
+}
+
+
+export default class ToDoWebPart extends React.Component<IToDoWebPartProps, IToDoWebPartState> {
+
+
+constructor(props: IToDoWebPartProps) {
+  super(props);
+
+  this.state = {
+    toDos : []
+  };
+
+}
+
+
+  public async componentDidMount() {
+        var items = await spToDoService.GetAllToDos();
+        console.log(items);
+        this.setState({toDos : items});
+  }
+
   public render(): React.ReactElement<IToDoWebPartProps> {
     return (
-      <div className={ styles.toDoWebPart }>
-        <div className={ styles.container }>
-          <div className={ styles.row }>
-            <div className={ styles.column }>
-              <span className={ styles.title }>Welcome to SharePoint!</span>
-              <p className={ styles.subTitle }>Customize SharePoint experiences using Web Parts.</p>
-              <p className={ styles.description }>{escape(this.props.description)}</p>
-              <a href="https://aka.ms/spfx" className={ styles.button }>
-                <span className={ styles.label }>Learn more</span>
-              </a>
-            </div>
-          </div>
-        </div>
+      <div>
+        <ToDoPanel onAdded={this.refreshData} ctx={this.props.ctx}></ToDoPanel>
+      <ToDoList key={Math.random()} items={this.state.toDos}></ToDoList>
       </div>
     );
+  }
+
+  private refreshData = async () => {
+    var items = await spToDoService.GetAllToDos();
+    console.log(items);
+    this.setState({toDos : items});
   }
 }
